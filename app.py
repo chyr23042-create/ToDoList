@@ -26,12 +26,12 @@ def create_tables_once():
 
 @app.get("/")
 def index():
-    filter_mode = request.args.get("filter", "すべて") 
+    filter_mode = request.args.get("filter", "all") 
     q = Task.query
 
-    if filter_mode == "未完了":
+    if filter_mode == "todo":
         q = q.filter_by(is_done=False)
-    elif filter_mode == "完了":
+    elif filter_mode == "done":
         q = q.filter_by(is_done=True)
 
     tasks = q.order_by(Task.is_done.asc(), Task.priority.asc(), Task.due_date.is_(None), Task.due_date.asc(), Task.created_at.desc()).all()
@@ -70,3 +70,4 @@ def delete_task(task_id: int):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
