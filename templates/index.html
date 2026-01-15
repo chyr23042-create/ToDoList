@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ToDoリスト</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; max-width: 900px; }
+    h1 { margin-bottom: 8px; }
+    .row { display:flex; gap:12px; flex-wrap: wrap; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 14px; margin: 10px 0; }
+    .muted { color:#666; font-size: 0.9em; }
+    .done { opacity: 0.6; text-decoration: line-through; }
+    button { cursor:pointer; }
+    input, select, textarea { padding: 8px; }
+    .filters a { margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h1>ToDoリスト</h1>
+  <p class="muted">タスクを一括管理</p>
+
+  {% set label = {'all':'すべて', 'todo':'未完了', 'done':'完了'} %}
+
+  <div class="filters">
+    <strong>表示:</strong>
+    <a href="/?filter=all"><strong>{{ label['all'] }}</strong></a>
+    <a href="/?filter=todo"><strong>{{ label['todo'] }}</strong></a>
+    <a href="/?filter=done"><strong>{{ label['done'] }}</strong></a>
+    <span class="muted">（現在: {{ label.get(filter_mode, 'すべて') }}）</span>
+  </div>
+
+  <h2>タスク追加</h2>
+  <form method="post" action="/add">
+    <div class="row">
+      <input name="title" placeholder="タイトル（必須）" style="flex:1; min-width:240px;" required>
+      <select name="priority">
+        <option value="1">重要度: 高</option>
+        <option value="2" selected>重要度: 中</option>
+        <option value="3">重要度: 低</option>
+      </select>
+      <input type="date" name="due_date">
+    </div>
+    <div style="margin-top:10px;">
+      <textarea name="description" placeholder="詳細（任意）" rows="3" style="width:100%;"></textarea>
+    </div>
+    <div style="margin-top:10px;">
+      <button type="submit">追加</button>
+    </div>
+  </form>
+
+  <h2>一覧</h2>
+  {% for t in tasks %}
+    <div class="card">
+      <div class="{{ 'done' if t.is_done else '' }}">
+        <strong>[{{ '高' if t.priority==1 else '中' if t.priority==2 else '低' }}] {{ t.title }}</strong>
+        {% if t.due_date %}
+          <span class="muted"> / 締切: {{ t.due_date }}</span>
+        {% endif %}
+      </div>
+      {% if t.description %}
+        <div class="muted {{ 'done' if t.is_done else '' }}" style="margin-top:6px;">{{ t.description }}</div>
+      {% endif %}
+      <div class="muted" style="margin-top:6px;">作成: {{ t.created_at }}</div>
+
+      <div class="row" style="margin-top:10px;">
+        <form method="post" action="/toggle/{{ t.id }}?filter={{ filter_mode }}">
+          <button type="submit">{{ '未完了に戻す' if t.is_done else '完了にする' }}</button>
+        </form>
+        <form method="post" action="/delete/{{ t.id }}?filter={{ filter_mode }}" onsubmit="return confirm('削除しますか？');">
+          <button type="submit">削除</button>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <p class="muted">すべて完了してます！</p>
+  {% endfor %}
+</body>
+</html>
