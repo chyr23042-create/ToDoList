@@ -21,6 +21,7 @@
   <p class="muted">タスクを一括管理</p>
 
   {% set label = {'all':'すべて', 'todo':'未完了', 'done':'完了'} %}
+  <span class="muted">（現在: {{ label.get(filter_mode, 'すべて') }}）</span>
 
   <div class="filters">
     <strong>表示:</strong>
@@ -77,3 +78,4 @@
   {% endfor %}
 </body>
 </html>
+
